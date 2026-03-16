@@ -67,10 +67,17 @@
         <section id="view-predictions" class="view">
             <div class="view-header">
                 <h2>Mis Predicciones</h2>
-                <p>Próxima Carrera: Gran Premio de Bahréin</p>
+                <p>Próxima Carrera: <span id="next-race-label">Cargando...</span></p>
             </div>
 
             <form id="prediction-form" class="prediction-form">
+                <div class="prediction-group" style="border-left-color: var(--text-secondary); background: #222;">
+                    <label>Evento a Votar</label>
+                    <select id="race-selector" class="driver-select" name="raceId" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
                 <div class="prediction-group">
                     <label><i class="fa-solid fa-stopwatch"></i> Pole Position (5 pts)</label>
                     <select class="driver-select" name="pole" required>
@@ -128,19 +135,74 @@
             </form>
         </section>
 
-        <!-- View: Admin / Results -->
-        <section id="view-admin" class="view">
+        <!-- View: Results Input -->
+        <section id="view-results" class="view">
             <div class="view-header">
                 <h2>Cargar Resultados</h2>
-                <p>Solo cargar cuando termine la carrera</p>
+                <p>Ingresa los resultados oficiales de la carrera. Esto calculará los puntos de todos.</p>
             </div>
+            
+            <form id="results-form" class="prediction-form" style="margin-top: 15px;">
+                <div class="prediction-group" style="border-left-color: var(--f1-red); background: #222;">
+                    <label>Evento a Procesar</label>
+                    <select id="results-race-selector" class="driver-select" name="raceId" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
 
-            <form id="results-form" class="prediction-form">
-                <p class="admin-warning"><i class="fa-solid fa-triangle-exclamation"></i> Al guardar los resultados, se
-                    calcularán los puntos para todos los jugadores automáticamente.</p>
+                <div class="prediction-group">
+                    <label><i class="fa-solid fa-stopwatch"></i> Pole Position Real</label>
+                    <select class="driver-select" name="pole" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
 
-                <button type="button" class="btn-primary admin-btn" id="generateResultsMock">Simular Resultados de
-                    Carrera y Calcular</button>
+                <div class="prediction-group podium">
+                    <label>Carrera: 1° Puesto Real</label>
+                    <select class="driver-select" name="pos1" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group podium">
+                    <label>Carrera: 2° Puesto Real</label>
+                    <select class="driver-select" name="pos2" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group podium">
+                    <label>Carrera: 3° Puesto Real</label>
+                    <select class="driver-select" name="pos3" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+
+                <div class="prediction-group midpack">
+                    <label>Carrera: 11° Puesto Real</label>
+                    <select class="driver-select" name="pos11" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group midpack">
+                    <label>Carrera: 12° Puesto Real</label>
+                    <select class="driver-select" name="pos12" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group midpack">
+                    <label>Carrera: 13° Puesto Real</label>
+                    <select class="driver-select" name="pos13" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+
+                <div class="prediction-group lastplace">
+                    <label>Carrera: Último Puesto Real</label>
+                    <select class="driver-select" name="last" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: 20px; background: var(--f1-red);">Procesar Resultados y Calcular Puntos</button>
             </form>
         </section>
 
@@ -160,7 +222,7 @@
             <i class="fa-solid fa-flag-checkered"></i>
             <span>Votar</span>
         </a>
-        <a href="#" class="nav-item" data-target="view-admin">
+        <a href="#" class="nav-item" data-target="view-results">
             <i class="fa-solid fa-list-check"></i>
             <span>Resultados</span>
         </a>

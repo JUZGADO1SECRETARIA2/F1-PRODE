@@ -132,6 +132,13 @@ document.addEventListener('DOMContentLoaded', () => {
         raceSelector.addEventListener('change', () => {
             loadFormFromState();
         });
+
+        // Selector for the Official Results view as well
+        const resultRaceSelector = document.getElementById('results-race-selector');
+        if (resultRaceSelector) {
+            resultRaceSelector.innerHTML = raceSelector.innerHTML;
+            resultRaceSelector.value = raceSelector.value;
+        }
     }
 
     // Handle User Switcher
@@ -167,7 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         const formData = new FormData(predictionForm);
-        const selectedRaceId = formData.get('raceId');
+        // Fallback to raceSelector.value directly if FormData doesn't catch it on first load
+        const selectedRaceId = formData.get('raceId') || (raceSelector ? raceSelector.value : null);
         
         if (!selectedRaceId) {
             alert('Debes seleccionar un evento.');
@@ -192,7 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (window.F1Logic) {
             window.F1Logic.savePrediction(selectedRaceId, predictionData);
-            alert('¡Predicciones guardadas localmente para ' + selectedRaceId + '!');
+            const raceName = raceSelector.options[raceSelector.selectedIndex].text.split(' (')[0];
+            alert('¡Predicciones guardadas localmente para ' + raceName + '!');
         }
         
         // Show Leaderboard
@@ -200,20 +209,48 @@ document.addEventListener('DOMContentLoaded', () => {
         window.F1Logic.updateLeaderboardUI();
     });
 
-    // Mock Admin Results
-    const adminBtn = document.getElementById('generateResultsMock');
-    if (adminBtn) {
-        adminBtn.addEventListener('click', () => {
-             // Let's use standard mock results 
-             const mockResults = {
-                pole: 'VER', pos1: 'VER', pos2: 'LEC', pos3: 'NOR',
-                pos11: 'COL', pos12: 'HUL', pos13: 'STR', last: 'ZHO'
-             };
-             if (window.F1Logic && raceSelector && raceSelector.value) {
-                 window.F1Logic.processRaceResults(raceSelector.value, mockResults);
-                 alert('Resultados oficiales cargados para ' + raceSelector.value + '!');
-                 navItems[0].click(); 
-             }
+    // Official Results Submission
+    const resultsForm = document.getElementById('results-form');
+    if (resultsForm) {
+        resultsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(resultsForm);
+            const rRaceSelector = document.getElementById('results-race-selector');
+            const selectedRaceId = formData.get('raceId') || (rRaceSelector ? rRaceSelector.value : null);
+            
+            if (!selectedRaceId) {
+                alert('Debes seleccionar un evento.');
+                return;
+            }
+
+            const officialData = {
+                pole: formData.get('pole'),
+                pos1: formData.get('pos1'),
+                pos2: formData.get('pos2'),
+                pos3: formData.get('pos3'),
+                pos11: formData.get('pos11'),
+                pos12: formData.get('pos12'),
+                pos13: formData.get('pos13'),
+                last: formData.get('last')
+            };
+
+            if (Object.values(officialData).includes('')) {
+                alert("Por favor completá todas las posiciones para poder calcular los puntos de esta carrera.");
+                return;
+            }
+
+            if (confirm("¿Estás seguro que estos son los resultados finales oficiales? Esto sobreescribirá el puntaje de esta fecha.")) {
+                if (window.F1Logic) {
+                    window.F1Logic.processRaceResults(selectedRaceId, officialData);
+                    let raceName = selectedRaceId;
+                    if (rRaceSelector.options.length > 0 && rRaceSelector.selectedIndex >= 0) {
+                        raceName = rRaceSelector.options[rRaceSelector.selectedIndex].text.split(' (')[0];
+                    }
+                    alert('Resultados oficiales cargados para ' + raceName + '. ¡Puntos calculados!');
+                    navItems[0].click(); // Go back to Leaderboard 
+                }
+            }
         });
     }
 

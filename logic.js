@@ -140,25 +140,14 @@ function processRaceResults(raceId, officialResults) {
     // Initialize points if missing
     players.forEach(p => { if (typeof p.totalPts !== 'number') p.totalPts = 0; });
 
-    // Actually we shouldn't reset points completely, we should recalculate everything from scratch
-    // to avoid bugs with multiple result savings. Start from basePts!
+    // Reset back to base points
     players.forEach(p => p.totalPts = p.basePts || 0);
 
-    // Recalculate ALL races
-    Object.keys(predictionsDb).forEach(rId => {
-        // Find if we have official results for this race somewhere. 
-        // For local storage mock, let's just assume we store official results under a special key or just calculate current race.
-        // To keep it simple, we just ADD points. In a real db, we'd store results globally and recalculate.
-    });
-
-    // To keep the mock simple, let's just add the points for this race. Focus on multiplayer setup later.
-    players.forEach(p => p.totalPts = p.basePts || 0); // Need to fully rebuild points locally for now across all scored races?
-
-    // MOCK FIX: Since we only have one single 'processRace' button in this local demo,
-    // we'll just wipe and recalculate just this one race to show it works.
-    players.forEach(player => {
-        const pPred = racePredictions[player.id];
-        if (pPred) {
+    // Sum points for the given race
+    Object.keys(racePredictions).forEach(playerId => {
+        const player = players.find(p => p.id === playerId);
+        if (player) {
+            const pPred = racePredictions[playerId];
             const earned = calculatePoints(pPred, officialResults, isSprint);
             player.totalPts += earned;
         }
@@ -194,7 +183,7 @@ function updateLeaderboardUI() {
                 <span class="pts">${player.totalPts} pts</span>
             </div>
             <!-- Indicator if they voted -->
-            <div style="font-size: 10px; color: ${predictionsDb['race_1'] && predictionsDb['race_1'][player.id] ? 'var(--gold)' : '#555'}">
+            <div style="font-size: 10px; color: ${(predictionsDb['r1'] && predictionsDb['r1'][player.id]) ? 'var(--gold)' : '#555'}" title="Voto registrado o no para Próxima Carrera">
                 <i class="fa-solid fa-check"></i>
             </div>
         `;
