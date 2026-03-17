@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,11 +8,14 @@
     <!-- Google Fonts: Roboto & Racing Sans One for F1 feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Roboto:wght@300;400;700;900&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <!-- Top Header -->
     <header class="app-header">
@@ -21,18 +25,18 @@
         </div>
         <div class="user-profile" id="userProfileBtn">
             <select id="user-switcher" title="Cambiar Jugador Activo">
-                <option value="p1">Tomás</option>
-                <option value="p2">Jugador 2</option>
-                <option value="p3">Jugador 3</option>
-                <option value="p4">Jugador 4</option>
-                <option value="p5">Jugador 5</option>
+                <option value="p1">Tomi</option>
+                <option value="p2">Juan</option>
+                <option value="p3">Bati</option>
+                <option value="p4">Capde</option>
+                <option value="p5">Jota</option>
             </select>
         </div>
     </header>
 
     <!-- Main Content Area -->
     <main class="app-main">
-        
+
         <!-- View: Leaderboard -->
         <section id="view-leaderboard" class="view active">
             <div class="view-header">
@@ -43,7 +47,19 @@
                 <!-- Populated dynamically by JS -->
             </div>
             <div style="margin-top: 30px; text-align: center;">
-                <button type="button" class="btn-primary" style="background:#333; font-size:14px; padding:10px" id="resetDataBtn">Resetear Datos Locales</button>
+                <button type="button" class="btn-primary" style="background:#333; font-size:14px; padding:10px"
+                    id="resetDataBtn">Resetear Datos Locales</button>
+            </div>
+        </section>
+
+        <!-- View: Calendar -->
+        <section id="view-calendar" class="view">
+            <div class="view-header">
+                <h2>Fixture F1</h2>
+                <p>Calendario Oficial 2026</p>
+            </div>
+            <div class="calendar-container" id="calendarList">
+                <!-- Populated dynamically by JS -->
             </div>
         </section>
 
@@ -51,10 +67,17 @@
         <section id="view-predictions" class="view">
             <div class="view-header">
                 <h2>Mis Predicciones</h2>
-                <p>Próxima Carrera: Gran Premio de Bahréin</p>
+                <p>Próxima Carrera: <span id="next-race-label">Cargando...</span></p>
             </div>
-            
+
             <form id="prediction-form" class="prediction-form">
+                <div class="prediction-group" style="border-left-color: var(--text-secondary); background: #222;">
+                    <label>Evento a Votar</label>
+                    <select id="race-selector" class="driver-select" name="raceId" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
                 <div class="prediction-group">
                     <label><i class="fa-solid fa-stopwatch"></i> Pole Position (5 pts)</label>
                     <select class="driver-select" name="pole" required>
@@ -66,45 +89,45 @@
                 <div class="prediction-group podium">
                     <label>Carrera: 1° Puesto (25 pts)</label>
                     <select class="driver-select" name="pos1" required>
-                         <option value="">Seleccionar Piloto...</option>
+                        <option value="">Seleccionar Piloto...</option>
                     </select>
                 </div>
                 <div class="prediction-group podium">
                     <label>Carrera: 2° Puesto (18 pts)</label>
                     <select class="driver-select" name="pos2" required>
-                         <option value="">Seleccionar Piloto...</option>
+                        <option value="">Seleccionar Piloto...</option>
                     </select>
                 </div>
                 <div class="prediction-group podium">
                     <label>Carrera: 3° Puesto (15 pts)</label>
                     <select class="driver-select" name="pos3" required>
-                         <option value="">Seleccionar Piloto...</option>
+                        <option value="">Seleccionar Piloto...</option>
                     </select>
                 </div>
-                
+
                 <div class="prediction-group mid-pack">
                     <label>Carrera: 11° Puesto (25 pts)</label>
                     <select class="driver-select" name="pos11" required>
-                         <option value="">Seleccionar Piloto...</option>
+                        <option value="">Seleccionar Piloto...</option>
                     </select>
                 </div>
                 <div class="prediction-group mid-pack">
                     <label>Carrera: 12° Puesto (18 pts)</label>
                     <select class="driver-select" name="pos12" required>
-                         <option value="">Seleccionar Piloto...</option>
+                        <option value="">Seleccionar Piloto...</option>
                     </select>
                 </div>
                 <div class="prediction-group mid-pack">
                     <label>Carrera: 13° Puesto (15 pts)</label>
                     <select class="driver-select" name="pos13" required>
-                         <option value="">Seleccionar Piloto...</option>
+                        <option value="">Seleccionar Piloto...</option>
                     </select>
                 </div>
 
                 <div class="prediction-group dnf">
                     <label><i class="fa-solid fa-skull-crossbones"></i> Último (10 pts)</label>
                     <select class="driver-select" name="last" required>
-                         <option value="">Seleccionar Piloto...</option>
+                        <option value="">Seleccionar Piloto...</option>
                     </select>
                 </div>
 
@@ -112,19 +135,87 @@
             </form>
         </section>
 
-        <!-- View: Admin / Results -->
-        <section id="view-admin" class="view">
+        <!-- View: Results Input -->
+        <section id="view-results" class="view">
             <div class="view-header">
                 <h2>Cargar Resultados</h2>
-                <p>Solo cargar cuando termine la carrera</p>
+                <p>Ingresa los resultados oficiales de la carrera. Esto calculará los puntos de todos.</p>
             </div>
             
-            <form id="results-form" class="prediction-form">
-                <p class="admin-warning"><i class="fa-solid fa-triangle-exclamation"></i> Al guardar los resultados, se calcularán los puntos para todos los jugadores automáticamente.</p>
-                
-                <button type="button" class="btn-primary admin-btn" id="generateResultsMock">Simular Resultados de Carrera y Calcular</button>
+            <form id="results-form" class="prediction-form" style="margin-top: 15px;">
+                <div class="prediction-group" style="border-left-color: var(--f1-red); background: #222;">
+                    <label>Evento a Procesar</label>
+                    <select id="results-race-selector" class="driver-select" name="raceId" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div class="prediction-group">
+                    <label><i class="fa-solid fa-stopwatch"></i> Pole Position Real</label>
+                    <select class="driver-select" name="pole" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+
+                <div class="prediction-group podium">
+                    <label>Carrera: 1° Puesto Real</label>
+                    <select class="driver-select" name="pos1" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group podium">
+                    <label>Carrera: 2° Puesto Real</label>
+                    <select class="driver-select" name="pos2" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group podium">
+                    <label>Carrera: 3° Puesto Real</label>
+                    <select class="driver-select" name="pos3" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+
+                <div class="prediction-group midpack">
+                    <label>Carrera: 11° Puesto Real</label>
+                    <select class="driver-select" name="pos11" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group midpack">
+                    <label>Carrera: 12° Puesto Real</label>
+                    <select class="driver-select" name="pos12" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+                <div class="prediction-group midpack">
+                    <label>Carrera: 13° Puesto Real</label>
+                    <select class="driver-select" name="pos13" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+
+                <div class="prediction-group lastplace">
+                    <label>Carrera: Último Puesto Real</label>
+                    <select class="driver-select" name="last" required>
+                        <option value="">Seleccionar Piloto...</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: 20px; background: var(--f1-red);">Procesar Resultados y Calcular Puntos</button>
             </form>
         </section>
+
+        <!-- Modal para seleccionar piloto -->
+        <div id="driver-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Selecciona un Piloto</h3>
+                    <button id="close-modal-btn" type="button"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="modal-driver-grid" class="driver-grid"></div>
+            </div>
+        </div>
 
     </main>
 
@@ -134,11 +225,15 @@
             <i class="fa-solid fa-trophy"></i>
             <span>Ranking</span>
         </a>
+        <a href="#" class="nav-item" data-target="view-calendar">
+            <i class="fa-regular fa-calendar-days"></i>
+            <span>Fixture</span>
+        </a>
         <a href="#" class="nav-item" data-target="view-predictions">
             <i class="fa-solid fa-flag-checkered"></i>
             <span>Votar</span>
         </a>
-        <a href="#" class="nav-item" data-target="view-admin">
+        <a href="#" class="nav-item" data-target="view-results">
             <i class="fa-solid fa-list-check"></i>
             <span>Resultados</span>
         </a>
@@ -148,4 +243,5 @@
     <script src="logic.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
