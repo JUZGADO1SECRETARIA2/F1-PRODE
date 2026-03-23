@@ -1,247 +1,503 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="dark" lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>F1 Prode</title>
-    <!-- Google Fonts: Roboto & Racing Sans One for F1 feel -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Roboto:wght@300;400;700;900&display=swap"
-        rel="stylesheet">
-    <!-- FontAwesome for Icons -->
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>PRODE F1 - 2026</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Mobile Fixes & Critical Card Styles */
+        .driver-grid-card {
+            background: #0e0e0e !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 1rem !important;
+            padding: 1.5rem 1rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            position: relative !important;
+            min-height: 180px !important;
+            width: 100% !important;
+            cursor: pointer;
+        }
+        .driver-img-container {
+            width: 84px !important;
+            height: 84px !important;
+            border-radius: 50% !important;
+            overflow: hidden !important;
+            background: #222 !important;
+            flex-shrink: 0 !important;
+        }
+        .driver-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover !important;
+        }
+        #modal-driver-grid {
+            display: grid !important;
+            grid-template-columns: repeat(1, 1fr) !important;
+            gap: 1rem !important;
+        }
+        @media (min-width: 640px) {
+            #modal-driver-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+        }
+        /* Grid Slot Fix */
+        .selected-driver-card {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .selected-driver-card img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: top !important;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#ffb4a8",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary-fixed": "#410000",
+                        "surface-dim": "#131313",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-container": "#970100",
+                        "on-primary-fixed-variant": "#930100",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed": "#410000",
+                        "outline-variant": "#603e39",
+                        "on-secondary-container": "#ff9f90",
+                        "tertiary-fixed-dim": "#acc7ff",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#488fff",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-tint": "#ffb4a8",
+                        "on-tertiary": "#002f67",
+                        "on-tertiary-fixed": "#001a40",
+                        "primary": "#ffb4a8",
+                        "surface-variant": "#353534",
+                        "on-secondary-fixed-variant": "#930100",
+                        "error-container": "#93000a",
+                        "surface-container": "#201f1f",
+                        "inverse-primary": "#c00100",
+                        "on-tertiary-container": "#00285b",
+                        "primary-fixed": "#ffdad4",
+                        "secondary": "#ffb4a8",
+                        "tertiary": "#acc7ff",
+                        "on-tertiary-fixed-variant": "#004491",
+                        "surface-container-high": "#2a2a2a",
+                        "on-background": "#e5e2e1",
+                        "inverse-on-surface": "#313030",
+                        "primary-container": "#ff5540",
+                        "tertiary-fixed": "#d7e2ff",
+                        "background": "#131313",
+                        "secondary-fixed": "#ffdad4",
+                        "on-secondary": "#690100",
+                        "surface-bright": "#3a3939",
+                        "on-error": "#690005",
+                        "outline": "#b18780",
+                        "surface": "#131313",
+                        "on-primary": "#690100",
+                        "on-surface": "#e5e2e1",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#ffb4a8",
+                        "on-primary-container": "#5c0000",
+                        "on-surface-variant": "#ebbbb4"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
 </head>
 
-<body>
-    <!-- Top Header -->
-    <header class="app-header">
-        <div class="logo">
-            <i class="fa-solid fa-flag-checkered"></i>
-            <span>PRODE <span class="text-red">F1</span></span>
+<body class="bg-surface text-on-surface font-body selection:bg-primary selection:text-on-primary">
+    <!-- TopAppBar -->
+    <header class="bg-[#131313] flex justify-between items-center w-full px-6 py-4 fixed top-0 z-50 border-b border-outline-variant/10">
+        <div class="text-2xl font-black italic tracking-tighter text-[#FF0000] uppercase font-headline">
+            PRODE F1
         </div>
-        <div class="user-profile" id="userProfileBtn">
-            <select id="user-switcher" title="Cambiar Jugador Activo">
-                <option value="p1">Tomi</option>
-                <option value="p2">Juan</option>
-                <option value="p3">Bati</option>
-                <option value="p4">Capde</option>
-                <option value="p5">Jota</option>
-            </select>
+        <div class="flex items-center gap-4">
+            <div class="user-switcher-container">
+                <select id="user-switcher" class="bg-transparent text-on-surface text-sm font-medium border-none focus:ring-0 cursor-pointer">
+                    <option value="p1">Tomi</option>
+                    <option value="p2">Juan</option>
+                    <option value="p3">Bati</option>
+                    <option value="p4">Capde</option>
+                    <option value="p5">Jota</option>
+                </select>
+            </div>
+            <button class="text-[#E5E2E1] hover:bg-[#2A2A2A] transition-colors duration-200 p-2 rounded-full flex items-center gap-2 scale-95 active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-[#FFB4A8]" data-icon="account_circle">account_circle</span>
+            </button>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="app-main">
-
+    <main class="pt-24 pb-32 px-4 md:px-8 max-w-5xl mx-auto min-h-screen">
+        
         <!-- View: Leaderboard -->
         <section id="view-leaderboard" class="view active">
-            <div class="view-header">
-                <h2>Tabla de Posiciones</h2>
-                <p>Temporada 2026</p>
+            <div class="mb-10 text-center md:text-left">
+                <h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight mb-2">
+                    Ranking <span class="text-primary">Temporada 2026</span>
+                </h1>
+                <p class="text-on-surface-variant font-body opacity-80">La lucha por el campeonato está que arde.</p>
             </div>
-            <div class="leaderboard-container">
-                <!-- Populated dynamically by JS -->
-            </div>
-            <div style="margin-top: 30px; text-align: center;">
-                <button type="button" class="btn-primary" style="background:#333; font-size:14px; padding:10px"
-                    id="resetDataBtn">Resetear Datos Locales</button>
-            </div>
-        </section>
-
-        <!-- View: Calendar -->
-        <section id="view-calendar" class="view">
-            <div class="view-header">
-                <h2>Fixture F1</h2>
-                <p>Calendario Oficial 2026</p>
-            </div>
-            <div class="calendar-container" id="calendarList">
+            
+            <div class="leaderboard-container grid gap-4 mb-12">
                 <!-- Populated dynamically by JS -->
             </div>
         </section>
 
-        <!-- View: Predictions -->
-        <section id="view-predictions" class="view">
-            <div class="view-header">
-                <h2>Mis Predicciones</h2>
-                <p>Próxima Carrera: <span id="next-race-label">Cargando...</span></p>
+        <!-- View: Calendar (Fixture) -->
+        <section id="view-calendar" class="view hidden">
+            <div class="mb-10 text-center md:text-left">
+                <h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight mb-2">
+                    Fixture <span class="text-primary">Calendario 2026</span>
+                </h1>
+                <p class="text-on-surface-variant font-body opacity-80">No te pierdas ninguna carrera.</p>
+            </div>
+            <div class="calendar-container grid grid-cols-1 md:grid-cols-2 gap-4" id="calendarList">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+        <!-- View: Predictions (Votar) -->
+        <section id="view-predictions" class="view hidden">
+            <div class="mb-10 text-center md:text-left">
+                <h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight mb-2">
+                    Mis Predicciones: <span id="next-race-label" class="text-primary">Cargando...</span>
+                </h1>
+                <p class="text-on-surface-variant font-body opacity-80">Configura tu parrilla estratégica antes de que se apaguen los semáforos.</p>
+            </div>
+
+            <!-- Race Selector (Added for functional parity) -->
+            <div class="mb-8 flex justify-center md:justify-start">
+                <div class="bg-surface-container-high p-4 rounded-xl border border-outline-variant/20 w-full max-w-sm">
+                    <label class="block text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Evento a Votar</label>
+                    <select id="race-selector" class="w-full bg-surface-container-highest text-on-surface border-none rounded-lg focus:ring-primary">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
             </div>
 
             <form id="prediction-form" class="prediction-form">
-                <div class="prediction-group" style="border-left-color: var(--text-secondary); background: #222;">
-                    <label>Evento a Votar</label>
-                    <select id="race-selector" class="driver-select" name="raceId" required>
-                        <!-- Populated dynamically -->
-                    </select>
+                <!-- The Starting Grid Visual -->
+                <div class="track-surface rounded-[2rem] p-8 md:p-12 mb-12 border border-outline-variant/10 shadow-2xl overflow-hidden">
+                    
+                    <!-- Category: Pole Position -->
+                    <div class="mb-16">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-primary" data-icon="stars" style="font-variation-settings: 'FILL' 1;">stars</span>
+                            <h2 class="font-headline text-2xl font-bold uppercase tracking-widest italic">Pole Position</h2>
+                        </div>
+                        <div class="flex justify-center md:justify-start">
+                            <button type="button" data-pick="pole" class="driver-picker-trigger group relative w-full max-w-sm h-48 bg-surface-container-highest rounded-xl border-2 border-dashed border-primary/30 hover:border-primary transition-all duration-300 flex flex-col items-center justify-center gap-2 grid-slot-glow overflow-hidden">
+                                <div class="picker-content flex flex-col items-center gap-2">
+                                    <span class="material-symbols-outlined text-4xl text-primary/40 group-hover:scale-110 transition-transform" data-icon="add_circle">add_circle</span>
+                                    <span class="font-headline font-bold uppercase text-on-surface-variant group-hover:text-primary transition-colors">Seleccionar Piloto</span>
+                                </div>
+                                <div class="absolute top-4 left-4 text-xs font-black text-primary/20 italic">P1</div>
+                                <input type="hidden" name="pole" class="driver-select" required>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category: Podium -->
+                    <div class="mb-16">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-primary" data-icon="emoji_events" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+                            <h2 class="font-headline text-2xl font-bold uppercase tracking-widest italic">Podium (1, 2, 3)</h2>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- P1 -->
+                            <button type="button" data-pick="pos1" class="driver-picker-trigger group relative h-48 bg-surface-container-low rounded-xl border-2 border-dashed border-outline-variant/30 hover:border-primary transition-all duration-300 flex flex-col items-center justify-center gap-2 overflow-hidden">
+                                <div class="picker-content flex flex-col items-center gap-2">
+                                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/40 group-hover:text-primary" data-icon="add_circle">add_circle</span>
+                                    <span class="font-headline font-bold uppercase text-on-surface-variant group-hover:text-primary transition-colors">Seleccionar P1</span>
+                                </div>
+                                <div class="absolute top-4 right-4 text-xs font-black text-on-surface-variant/20 italic">P1</div>
+                                <input type="hidden" name="pos1" class="driver-select" required>
+                            </button>
+                            <!-- P2 -->
+                            <button type="button" data-pick="pos2" class="driver-picker-trigger group relative h-48 bg-surface-container-low rounded-xl border-2 border-dashed border-outline-variant/30 hover:border-primary transition-all duration-300 flex flex-col items-center justify-center gap-2 overflow-hidden">
+                                <div class="picker-content flex flex-col items-center gap-2">
+                                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/40 group-hover:text-primary" data-icon="add_circle">add_circle</span>
+                                    <span class="font-headline font-bold uppercase text-on-surface-variant group-hover:text-primary transition-colors">Seleccionar P2</span>
+                                </div>
+                                <div class="absolute top-4 right-4 text-xs font-black text-on-surface-variant/20 italic">P2</div>
+                                <input type="hidden" name="pos2" class="driver-select" required>
+                            </button>
+                            <!-- P3 -->
+                            <button type="button" data-pick="pos3" class="driver-picker-trigger group relative h-48 bg-surface-container-low rounded-xl border-2 border-dashed border-outline-variant/30 hover:border-primary transition-all duration-300 flex flex-col items-center justify-center gap-2 overflow-hidden">
+                                <div class="picker-content flex flex-col items-center gap-2">
+                                    <span class="material-symbols-outlined text-3xl text-on-surface-variant/40 group-hover:text-primary" data-icon="add_circle">add_circle</span>
+                                    <span class="font-headline font-bold uppercase text-on-surface-variant group-hover:text-primary transition-colors">Seleccionar P3</span>
+                                </div>
+                                <div class="absolute top-4 right-4 text-xs font-black text-on-surface-variant/20 italic">P3</div>
+                                <input type="hidden" name="pos3" class="driver-select" required>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category: Midfield Points -->
+                    <div class="mb-16">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-primary" data-icon="speed" style="font-variation-settings: 'FILL' 1;">speed</span>
+                            <h2 class="font-headline text-2xl font-bold uppercase tracking-widest italic">P11, P12, P13</h2>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <button type="button" data-pick="pos11" class="driver-picker-trigger h-32 bg-surface-container-highest/40 rounded-xl border border-outline-variant/20 flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+                                <div class="picker-content flex flex-col items-center">
+                                    <span class="material-symbols-outlined opacity-40 mb-1" data-icon="person_add">person_add</span>
+                                    <span class="text-xs font-black italic text-primary">P11</span>
+                                </div>
+                                <input type="hidden" name="pos11" class="driver-select" required>
+                            </button>
+                            <button type="button" data-pick="pos12" class="driver-picker-trigger h-32 bg-surface-container-highest/40 rounded-xl border border-outline-variant/20 flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
+                                <div class="picker-content flex flex-col items-center">
+                                    <span class="material-symbols-outlined opacity-40 mb-1" data-icon="person_add">person_add</span>
+                                    <span class="text-xs font-black italic text-primary">P12</span>
+                                </div>
+                                <input type="hidden" name="pos12" class="driver-select" required>
+                            </button>
+                            <button type="button" data-pick="pos13" class="driver-picker-trigger h-32 bg-surface-container-highest/40 rounded-xl border border-outline-variant/20 flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors md:col-span-1 col-span-2">
+                                <div class="picker-content flex flex-col items-center">
+                                    <span class="material-symbols-outlined opacity-40 mb-1" data-icon="person_add">person_add</span>
+                                    <span class="text-xs font-black italic text-primary">P13</span>
+                                </div>
+                                <input type="hidden" name="pos13" class="driver-select" required>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category: Last Place -->
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-primary" data-icon="flag" style="font-variation-settings: 'FILL' 1;">flag</span>
+                            <h2 class="font-headline text-2xl font-bold uppercase tracking-widest italic">Last Place</h2>
+                        </div>
+                        <button type="button" data-pick="last" class="driver-picker-trigger w-full md:w-64 group relative h-32 bg-surface-container-low rounded-xl border-2 border-dashed border-outline-variant/30 hover:border-primary transition-all duration-300 flex flex-col items-center justify-center gap-2 overflow-hidden">
+                            <div class="picker-content flex flex-col items-center gap-2">
+                                <span class="material-symbols-outlined text-2xl text-on-surface-variant/40 group-hover:text-primary" data-icon="add_circle">add_circle</span>
+                                <span class="font-headline font-bold uppercase text-on-surface-variant group-hover:text-primary transition-colors text-sm">Fin del Pelotón</span>
+                            </div>
+                            <div class="absolute top-4 right-4 text-xs font-black text-on-surface-variant/20 italic">P20</div>
+                            <input type="hidden" name="last" class="driver-select" required>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="prediction-group">
-                    <label><i class="fa-solid fa-stopwatch"></i> Pole Position (5 pts)</label>
-                    <select class="driver-select" name="pole" required>
-                        <option value="">Seleccionar Piloto...</option>
-                        <!-- Populated dynamically -->
-                    </select>
+                <!-- Primary Action -->
+                <div class="flex justify-center mb-12">
+                    <button type="submit" class="group relative px-12 py-5 rounded-xl font-headline font-bold text-xl uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_10px_40px_rgba(255,0,0,0.3)]">
+                        <div class="absolute inset-0 bg-gradient-to-r from-primary-container to-secondary-container"></div>
+                        <div class="relative flex items-center gap-4 text-on-primary">
+                            <span>Guardar Predicciones</span>
+                            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" data-icon="send">send</span>
+                        </div>
+                    </button>
                 </div>
-
-                <div class="prediction-group podium">
-                    <label>Carrera: 1° Puesto (25 pts)</label>
-                    <select class="driver-select" name="pos1" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-                <div class="prediction-group podium">
-                    <label>Carrera: 2° Puesto (18 pts)</label>
-                    <select class="driver-select" name="pos2" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-                <div class="prediction-group podium">
-                    <label>Carrera: 3° Puesto (15 pts)</label>
-                    <select class="driver-select" name="pos3" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-
-                <div class="prediction-group mid-pack">
-                    <label>Carrera: 11° Puesto (25 pts)</label>
-                    <select class="driver-select" name="pos11" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-                <div class="prediction-group mid-pack">
-                    <label>Carrera: 12° Puesto (18 pts)</label>
-                    <select class="driver-select" name="pos12" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-                <div class="prediction-group mid-pack">
-                    <label>Carrera: 13° Puesto (15 pts)</label>
-                    <select class="driver-select" name="pos13" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-
-                <div class="prediction-group dnf">
-                    <label><i class="fa-solid fa-skull-crossbones"></i> Último (10 pts)</label>
-                    <select class="driver-select" name="last" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn-primary">Guardar Predicciones</button>
             </form>
         </section>
 
-        <!-- View: Results Input -->
-        <section id="view-results" class="view">
-            <div class="view-header">
-                <h2>Cargar Resultados</h2>
-                <p>Ingresa los resultados oficiales de la carrera. Esto calculará los puntos de todos.</p>
+        <!-- View: Results -->
+        <section id="view-results" class="view hidden">
+            <div class="mb-10 text-center md:text-left">
+                <h1 class="font-headline text-4xl md:text-5xl font-bold tracking-tight mb-2">
+                    Cargar <span class="text-primary">Resultados Oficiales</span>
+                </h1>
+                <p class="text-on-surface-variant font-body opacity-80">Solo para administradores. Ingresa los resultados de la carrera.</p>
             </div>
-            
-            <form id="results-form" class="prediction-form" style="margin-top: 15px;">
-                <div class="prediction-group" style="border-left-color: var(--f1-red); background: #222;">
-                    <label>Evento a Procesar</label>
-                    <select id="results-race-selector" class="driver-select" name="raceId" required>
+
+            <form id="results-form" class="prediction-form max-w-2xl mx-auto bg-surface-container-high p-6 rounded-2xl border border-outline-variant/10 shadow-xl">
+                 <div class="mb-6">
+                    <label class="block text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Evento a Procesar</label>
+                    <select id="results-race-selector" name="raceId" class="w-full bg-surface-container-highest text-on-surface border-none rounded-lg focus:ring-primary">
                         <!-- Populated dynamically -->
                     </select>
                 </div>
+                
+                <div class="grid gap-4">
+                    <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">Pole Position</label>
+                        <select id="res-pole" name="pole" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required>
+                             <option value="">Seleccionar Piloto...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                            <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">P1</label>
+                            <select name="pos1" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required></select>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                            <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">P2</label>
+                            <select name="pos2" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required></select>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                            <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">P3</label>
+                            <select name="pos3" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required></select>
+                        </div>
+                    </div>
 
-                <div class="prediction-group">
-                    <label><i class="fa-solid fa-stopwatch"></i> Pole Position Real</label>
-                    <select class="driver-select" name="pole" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                            <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">P11</label>
+                            <select name="pos11" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required></select>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                            <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">P12</label>
+                            <select name="pos12" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required></select>
+                        </div>
+                        <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                            <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">P13</label>
+                            <select name="pos13" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required></select>
+                        </div>
+                    </div>
 
-                <div class="prediction-group podium">
-                    <label>Carrera: 1° Puesto Real</label>
-                    <select class="driver-select" name="pos1" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-                <div class="prediction-group podium">
-                    <label>Carrera: 2° Puesto Real</label>
-                    <select class="driver-select" name="pos2" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-                <div class="prediction-group podium">
-                    <label>Carrera: 3° Puesto Real</label>
-                    <select class="driver-select" name="pos3" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
+                    <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/5">
+                        <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">Último</label>
+                        <select name="last" class="driver-select w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 text-sm py-2" required></select>
+                    </div>
 
-                <div class="prediction-group midpack">
-                    <label>Carrera: 11° Puesto Real</label>
-                    <select class="driver-select" name="pos11" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
+                    <button type="submit" class="w-full bg-primary text-on-primary font-headline font-bold py-4 rounded-xl hover:opacity-90 active:scale-95 transition-all">
+                        Calcular Puntos
+                    </button>
+                    
+                    <button type="button" id="resetDataBtn" class="w-full text-error text-xs font-bold uppercase tracking-widest mt-4 opacity-50 hover:opacity-100 transition-opacity">
+                        Borrar todos los datos locales
+                    </button>
                 </div>
-                <div class="prediction-group midpack">
-                    <label>Carrera: 12° Puesto Real</label>
-                    <select class="driver-select" name="pos12" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-                <div class="prediction-group midpack">
-                    <label>Carrera: 13° Puesto Real</label>
-                    <select class="driver-select" name="pos13" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-
-                <div class="prediction-group lastplace">
-                    <label>Carrera: Último Puesto Real</label>
-                    <select class="driver-select" name="last" required>
-                        <option value="">Seleccionar Piloto...</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn-primary" style="margin-top: 20px; background: var(--f1-red);">Procesar Resultados y Calcular Puntos</button>
             </form>
         </section>
-
-        <!-- Modal para seleccionar piloto -->
-        <div id="driver-modal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Selecciona un Piloto</h3>
-                    <button id="close-modal-btn" type="button"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div id="modal-driver-grid" class="driver-grid"></div>
-            </div>
-        </div>
 
     </main>
 
-    <!-- Bottom Navigation for Mobile -->
-    <nav class="bottom-nav">
-        <a href="#" class="nav-item active" data-target="view-leaderboard">
-            <i class="fa-solid fa-trophy"></i>
-            <span>Ranking</span>
+    <style>
+        /* Mobile Fixes & Critical Card Styles */
+        .driver-grid-card {
+            background: #0e0e0e !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 1rem !important;
+            padding: 1.5rem 1rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            position: relative !important;
+            min-height: 180px !important;
+            width: 100% !important;
+            cursor: pointer;
+        }
+        .driver-img-container {
+            width: 84px !important;
+            height: 84px !important;
+            border-radius: 50% !important;
+            overflow: hidden !important;
+            background: #222 !important;
+            flex-shrink: 0 !important;
+        }
+        .driver-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover !important;
+        }
+        .driver-img-container-rect {
+            width: 120px !important;
+            height: 160px !important;
+            border-radius: 0.75rem !important;
+            overflow: hidden !important;
+            background: transparent !important;
+            flex-shrink: 0 !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+        }
+        .driver-img-container-rect img {
+            width: 400% !important;
+            height: auto !important;
+            object-fit: cover !important;
+            display: block;
+        }
+        #modal-driver-grid {
+            display: grid !important;
+            grid-template-columns: repeat(1, 1fr) !important;
+            gap: 1rem !important;
+        }
+        @media (min-width: 640px) {
+            #modal-driver-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+        }
+        /* Grid Slot Fix */
+        .selected-driver-card {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .selected-driver-card img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: top !important;
+        }
+    </style>
+
+    <div id="driver-modal" class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-black/80 backdrop-blur-xl hidden">
+        <div class="bg-[#1C1C1E] w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] border border-white/10 overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center bg-[#1C1C1E]">
+                <h2 class="font-headline text-2xl font-black italic uppercase text-white tracking-tighter">Selecciona tu piloto</h2>
+                <button id="close-modal-btn" class="p-2 hover:bg-white/10 rounded-full transition-all">
+                    <span class="material-symbols-outlined text-white" data-icon="close">close</span>
+                </button>
+            </div>
+            <div id="modal-driver-grid" class="flex-1 p-6 overflow-y-auto bg-[#131313]">
+                <!-- Contenido generado dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Premium) -->
+    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#131313]/90 backdrop-blur-xl border-t border-[#603E39]/15 shadow-[0_-4px_20px_rgba(0,0,0,0.6)] rounded-t-[2.5rem]">
+        <a href="#" class="nav-item flex flex-col items-center justify-center text-[#E5E2E1]/60 px-4 py-1.5 hover:text-[#FFB4A8] transition-all active" data-target="view-leaderboard">
+            <span class="material-symbols-outlined mb-1" data-icon="leaderboard">leaderboard</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-label">Ranking</span>
         </a>
-        <a href="#" class="nav-item" data-target="view-calendar">
-            <i class="fa-regular fa-calendar-days"></i>
-            <span>Fixture</span>
+        <a href="#" class="nav-item flex flex-col items-center justify-center text-[#E5E2E1]/60 px-4 py-1.5 hover:text-[#FFB4A8] transition-all" data-target="view-calendar">
+            <span class="material-symbols-outlined mb-1" data-icon="event">event</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-label">Fixture</span>
         </a>
-        <a href="#" class="nav-item" data-target="view-predictions">
-            <i class="fa-solid fa-flag-checkered"></i>
-            <span>Votar</span>
+        <a href="#" class="nav-item flex flex-col items-center justify-center bg-gradient-to-b from-[#FFB4A8] to-[#FF5540] text-[#131313] rounded-xl px-4 py-1.5 active:scale-95 transition-all duration-150 shadow-lg" data-target="view-predictions">
+            <span class="material-symbols-outlined mb-1" data-icon="how_to_vote" style="font-variation-settings: 'FILL' 1;">how_to_vote</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-label">Votar</span>
         </a>
-        <a href="#" class="nav-item" data-target="view-results">
-            <i class="fa-solid fa-list-check"></i>
-            <span>Resultados</span>
+        <a href="#" class="nav-item flex flex-col items-center justify-center text-[#E5E2E1]/60 px-4 py-1.5 hover:text-[#FFB4A8] transition-all" data-target="view-results">
+            <span class="material-symbols-outlined mb-1" data-icon="flag">flag</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-label">Resultados</span>
         </a>
     </nav>
 
     <script type="module" src="firebase-config.js"></script>
-    <script src="logic.js"></script>
-    <script src="app.js"></script>
+    <script src="logic.js?v=2"></script>
+    <script src="app.js?v=2"></script>
 </body>
 
 </html>

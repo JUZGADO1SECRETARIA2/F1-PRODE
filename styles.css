@@ -1,18 +1,26 @@
+/* --- F1 Prode Premium Design System --- */
 :root {
-    --bg-main: #111115;
-    --bg-card: #1e1e24;
-    --bg-card-hover: #2a2a32;
-    --f1-red: #e10600;
-    --f1-red-dark: #b30500;
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0ab;
-    --gold: #ffd700;
-    --silver: #c0c0c0;
-    --bronze: #cd7f32;
-    --glass-bg: rgba(30, 30, 36, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --primary: #ffb4a8;
+    --primary-container: #ff5540;
+    --on-primary: #690100;
+    --secondary-container: #970100;
+    --tertiary: #acc7ff;
+    --surface: #131313;
+    --surface-variant: #353534;
+    --surface-container-low: #1c1b1b;
+    --surface-container: #201f1f;
+    --surface-container-high: #2a2a2a;
+    --surface-container-highest: #353534;
+    --on-surface: #e5e2e1;
+    --on-surface-variant: #ebbbb4;
+    --outline: #b18780;
+    --outline-variant: #603e39;
+    --error: #ffb4ab;
+    --error-container: #93000a;
+    --f1-red: #FF0000;
 }
 
+/* Base resets & Fonts */
 * {
     margin: 0;
     padding: 0;
@@ -21,555 +29,282 @@
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: var(--bg-main);
-    color: var(--text-primary);
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: 'Inter', sans-serif;
     overflow-x: hidden;
-    padding-bottom: 80px; /* Space for bottom nav */
 }
 
-/* Header */
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-.logo {
-    font-family: 'Racing Sans One', display;
-    font-size: 24px;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.text-red {
-    color: var(--f1-red);
-}
-
-.user-profile {
-    font-size: 16px;
-    color: var(--text-secondary);
-}
-
-#user-switcher {
-    background: #2a2a32;
-    color: white;
-    border: 1px solid var(--f1-red);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-family: 'Roboto', sans-serif;
-    font-weight: bold;
-    outline: none;
-    cursor: pointer;
-}
-
-/* Main Content & Views */
-.app-main {
-    padding: 20px;
-}
-
+/* --- Layout Elements --- */
 .view {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.view.hidden {
     display: none;
-    animation: fadeIn 0.3s ease-out;
+    opacity: 0;
+    transform: translateY(10px);
 }
 
-.view.active {
+.view:not(.hidden) {
     display: block;
+    opacity: 1;
+    transform: translateY(0);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* --- Premium Grid Visual (Votar) --- */
+.track-surface {
+    background-image: linear-gradient(to bottom, #131313, #1c1b1b 50%, #131313);
+    position: relative;
+    z-index: 1;
 }
 
-.view-header {
-    margin-bottom: 25px;
+.track-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 70%);
+    pointer-events: none;
 }
 
-.view-header h2 {
-    font-family: 'Racing Sans One', display;
-    font-size: 28px;
-    margin-bottom: 5px;
-    letter-spacing: 0.5px;
+.grid-slot-glow {
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
 }
 
-.view-header p {
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-/* Leaderboard */
-.leaderboard-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.leaderboard-card {
-    background: var(--bg-card);
-    border-radius: 12px;
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    border: 1px solid var(--glass-border);
-    transition: transform 0.2s;
-}
-
-.leaderboard-card:active {
-    transform: scale(0.98);
-}
-
-.pos-badge {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 16px;
-}
-
-.pos-1 .pos-badge { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
-.pos-2 .pos-badge { background: var(--silver); color: #000; }
-.pos-3 .pos-badge { background: var(--bronze); color: #fff; }
-
-.player-info {
-    flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.player-info h3 {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.player-info .pts {
-    font-family: 'Racing Sans One', display;
-    font-size: 20px;
-    color: var(--f1-red);
-}
-
-/* Calendar */
-.calendar-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.race-card {
-    background: var(--bg-card);
-    border-radius: 12px;
-    padding: 15px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border: 1px solid var(--glass-border);
-    border-left: 4px solid #4a4a5a;
-}
-
-.race-card.next {
-    border-left: 4px solid var(--f1-red);
-    background: linear-gradient(145deg, var(--bg-card) 0%, #2a1a1a 100%);
-}
-
-.race-card.completed {
-    opacity: 0.6;
-}
-
-.race-card.upcoming {
-    opacity: 0.85;
-}
-
-.race-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.race-header h3 {
-    font-size: 18px;
-    margin-bottom: 2px;
-}
-
-.race-header span {
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 2px 8px;
-    border-radius: 10px;
-}
-
-.race-date {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-.race-date i {
-    color: var(--f1-red);
-}
-
-/* Forms & Inputs */
-.prediction-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.prediction-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: var(--bg-card);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid var(--glass-border);
-    border-left: 4px solid var(--f1-red);
-}
-
-.prediction-group.podium { border-left-color: var(--gold); }
-.prediction-group.mid-pack { border-left-color: #4a4a5a; }
-.prediction-group.dnf { border-left-color: #ff3333; }
-
-.prediction-group label {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.driver-select {
+/* Selection Cards (When a driver is selected in the grid) */
+.selected-driver-card {
+    position: relative;
     width: 100%;
-    padding: 12px;
-    background: #2a2a32;
-    border: 1px solid #3a3a45;
-    border-radius: 8px;
-    color: white;
-    font-size: 16px;
-    font-family: 'Roboto', sans-serif;
-    outline: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1em;
-}
-
-.driver-select:focus {
-    border-color: var(--f1-red);
-    box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.2);
-}
-
-.btn-primary {
-    background: var(--f1-red);
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-family: 'Racing Sans One', display;
-    font-weight: normal;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    margin-top: 10px;
-    width: 100%;
-}
-
-.btn-primary:active {
-    transform: scale(0.98);
-}
-
-.admin-warning {
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.5;
-    padding: 15px;
-    background: rgba(255, 215, 0, 0.1);
-    border-radius: 8px;
-    border-left: 4px solid var(--gold);
-}
-
-.admin-btn {
-    background: #333;
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: var(--glass-bg);
-    backdrop-filter: blur(15px);
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    z-index: 100;
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 12px;
-    width: 33%;
-    transition: color 0.2s;
-}
-
-.nav-item i {
-    font-size: 20px;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.nav-item.active {
-    color: var(--f1-red);
-    font-weight: 700;
-}
-
-.nav-item.active i {
-    transform: scale(1.2);
-}
-
-/* Driver Picker Button */
-.driver-picker-btn {
-    width: 100%;
-    padding: 10px 15px;
-    background: #2a2a32;
-    border: 1px solid #3a3a45;
-    border-radius: 8px;
-    color: white;
-    font-size: 16px;
-    font-family: 'Roboto', sans-serif;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    min-height: 54px;
-    transition: all 0.2s ease;
-}
-
-.driver-picker-btn:active {
-    transform: scale(0.98);
-}
-
-.driver-picker-btn i {
-    color: var(--text-secondary);
-}
-
-.picker-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.placeholder-text {
-    color: #888;
-}
-
-.selected-driver {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-}
-
-.selected-num {
-    font-family: 'Racing Sans One', display;
-    font-size: 18px;
-    width: 28px;
-    text-align: center;
-}
-
-.selected-img {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
+    height: 100%;
     overflow: hidden;
-    background: #111;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
 }
 
-.selected-img img {
+.selected-driver-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: top;
+    opacity: 0.6;
+    transition: opacity 0.3s;
 }
 
-.selected-name {
-    font-weight: 700;
-    font-size: 16px;
-    color: #fff;
-}
-
-/* Modal for Driver Selection */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.active {
+.selected-driver-card:hover img {
     opacity: 1;
-    pointer-events: auto;
 }
 
-.modal-content {
-    background: var(--bg-main);
-    width: 100%;
-    height: 85vh;
-    margin-top: auto;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 -5px 25px rgba(0,0,0,0.5);
-    border-top: 1px solid var(--glass-border);
+.selected-driver-info {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 2;
 }
 
-.modal-header {
+/* --- Leaderboard Cards --- */
+.leaderboard-card {
+    background: var(--surface-container);
+    border: 1px solid rgba(96, 62, 57, 0.2);
+    border-radius: 1rem;
+    padding: 1.25rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--glass-border);
-    flex-shrink: 0;
+    gap: 1.5rem;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.modal-header h3 {
-    font-family: 'Racing Sans One', display;
-    font-size: 22px;
-    margin: 0;
+.leaderboard-card:hover {
+    background: var(--surface-container-high);
+    border-color: var(--primary);
+    transform: translateX(8px);
 }
 
-#close-modal-btn {
+.pos-badge {
+    width: 3rem;
+    height: 3rem;
+    background: var(--surface-container-highest);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.pos-1 .pos-badge { background: linear-gradient(135deg, #FFD700, #DAA520); color: #000; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+.pos-2 .pos-badge { background: linear-gradient(135deg, #C0C0C0, #808080); color: #000; }
+.pos-3 .pos-badge { background: linear-gradient(135deg, #CD7F32, #8B4513); color: #fff; }
+
+/* --- Fixture (Calendar) --- */
+.race-card {
+    background: var(--surface-container-high);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid var(--outline-variant);
+    transition: all 0.2s;
+    border-left: 6px solid var(--surface-variant);
+}
+
+.race-card.next {
+    border-left-color: var(--f1-red);
+    background: linear-gradient(145deg, var(--surface-container-high) 0%, #2a1a1a 100%);
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.1);
+}
+
+/* --- Modals --- */
+#modal-driver-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+#modal-driver-grid::-webkit-scrollbar-track {
     background: transparent;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 5px;
 }
 
-.driver-grid {
-    padding: 20px;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-    gap: 15px;
-    padding-bottom: 80px; /* space for scrolling */
+#modal-driver-grid::-webkit-scrollbar-thumb {
+    background: var(--surface-container-highest);
+    border-radius: 10px;
 }
 
 .driver-grid-card {
-    background: var(--bg-card);
-    border: 2px solid #333;
-    border-radius: 12px;
-    padding: 12px 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    position: relative;
-    overflow: hidden;
+    background: var(--surface-container-lowest) !important;
+    border: 1px solid var(--outline-variant) !important;
+    border-radius: 1rem !important;
+    padding: 1.25rem 1rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    min-height: 180px !important;
+    height: 180px !important;
+    width: 100% !important;
 }
 
-.driver-grid-card:active {
-    transform: scale(0.95);
-    background: #2a2a32;
+.driver-grid-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
 }
 
 .driver-grid-card .driver-number {
     position: absolute;
-    top: -5px;
-    right: 5px;
-    font-family: 'Racing Sans One', display;
-    font-size: 32px;
-    opacity: 0.15;
-    z-index: 0;
-    color: white;
+    top: 4px;
+    right: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    opacity: 0.05;
+    font-style: italic;
 }
 
 .driver-img-container {
-    width: 55px;
-    height: 55px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    z-index: 1;
-    background: #111;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: var(--surface-container-highest);
     overflow: hidden;
-    border: 2px solid transparent; 
-    flex-shrink: 0;
+    border: 2px solid transparent;
+    flex-shrink: 0; /* Prevent collapse */
 }
 
 .driver-grid-card:hover .driver-img-container {
-    border-color: currentColor; /* Border inherits the grid card border */
+    border-color: currentColor;
 }
 
 .driver-img-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center top;
+    object-position: top;
 }
 
-.driver-name {
-    font-size: 11px;
-    font-weight: 700;
-    text-align: center;
-    z-index: 1;
-    line-height: 1.2;
-    padding: 0 4px;
+/* --- Season Track (Circuito) --- */
+.season-track {
+    background: var(--surface-container-low);
+    border-radius: 2rem;
+    padding: 2rem;
+    border: 1px solid rgba(255, 0, 0, 0.05);
+    margin-top: 3rem;
 }
 
-.no-img, .no-img-mini {
-    color: white;
-    font-weight: bold;
+.track-lane {
+    height: 140px;
+    position: relative;
+    background: #0e0e0e;
+    border-radius: 1.5rem;
+    margin-top: 2rem;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.track-racing-line {
+    position: absolute;
+    bottom: 25px;
+    left: 40px;
+    right: 40px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
+    justify-content: space-around;
+    align-items: flex-end;
 }
-.no-img { font-size: 18px; }
-.no-img-mini { font-size: 14px; }
+
+.track-car {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.track-car-body {
+    width: 40px;
+    height: 20px;
+    background: #444;
+    border-radius: 6px;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.track-car-body::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    width: 14px;
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}
+
+/* Player Specific Car Colors */
+.track-car-body--tomi { filter: hue-rotate(110deg) saturate(2); }
+.track-car-body--capde { filter: hue-rotate(0deg) saturate(2); }
+.track-car-body--juan { filter: hue-rotate(210deg) saturate(2); }
+.track-car-body--jota { filter: hue-rotate(55deg) saturate(3); }
+.track-car-body--bati { filter: grayscale(1) brightness(0.3); }
+
+.track-car-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Animations */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+.active-glow {
+    animation: pulse-red 2s infinite;
+}
