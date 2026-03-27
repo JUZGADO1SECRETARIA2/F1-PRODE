@@ -1,41 +1,39 @@
-// Este archivo contiene la configuración de Firebase
-// Firebase te permitirá guardar los datos de los 5 amigos gratis sin necesidad de pagar un servidor.
+// Configuración Firebase - F1 Prode
+// =============================================
+// INSTRUCCIONES (una sola vez):
+// 1. Ir a https://console.firebase.google.com/
+// 2. Crear un proyecto nuevo (ej: "f1-prode")
+// 3. Build → Realtime Database → Crear base de datos → modo Locked → Crear
+// 4. Reglas → reemplazar con: { "rules": { ".read": true, ".write": true } } → Publicar
+// 5. Configuración del proyecto (engranaje) → Tus apps → Agregar app Web (</>)
+// 6. Copiar el firebaseConfig y pegarlo acá abajo reemplazando los valores de ejemplo
+// =============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-// ====== ATENCIÓN: INSTRUCCIONES ======
-// 1. Ve a https://console.firebase.google.com/
-// 2. Crea un proyecto nuevo (Gratis)
-// 3. Añade una App "Web" (el ícono de código </>)
-// 4. Copia el objeto "firebaseConfig" que te dan y pégalo aquí abajo reemplazando el de ejemplo:
-// 5. Ve a "Realtime Database" en el menú izquierdo, crea una base de datos.
-// 6. Ve a las "Reglas" de la base de datos y pon: { ".read": true, ".write": true } (Solo porque son 5 amigos en privado, para no complicar con logins).
+import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
 const firebaseConfig = {
-    apiKey: "TU_API_KEY_AQUI",
-    authDomain: "tu-proyecto.firebaseapp.com",
-    databaseURL: "https://tu-proyecto-default-rtdb.firebaseio.com",
-    projectId: "tu-proyecto",
-    storageBucket: "tu-proyecto.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
+    apiKey: "AIzaSyC-Q7GCXlcXaC-sBSOB7RqfRvgaPz-x9DQ",
+    authDomain: "f1-prode-f5929.firebaseapp.com",
+    databaseURL: "https://f1-prode-f5929-default-rtdb.firebaseio.com",
+    projectId: "f1-prode-f5929",
+    storageBucket: "f1-prode-f5929.firebasestorage.app",
+    messagingSenderId: "657658228626",
+    appId: "1:657658228626:web:cf3a6b86509e90c63c9b4b"
 };
 
-// Initialize Firebase solo si se cambió la config por defecto
-let app, db;
+let db = null;
 
 if (firebaseConfig.apiKey !== "TU_API_KEY_AQUI") {
     try {
-        app = initializeApp(firebaseConfig);
+        const app = initializeApp(firebaseConfig);
         db = getDatabase(app);
-        console.log("Firebase conectado exitosamente.");
+        console.log("✅ Firebase conectado.");
     } catch (e) {
-        console.error("Error conectando a Firebase:", e);
+        console.error("❌ Error conectando Firebase:", e);
     }
 } else {
-    console.warn("Firebase no está configurado. Usando modo Local de Prueba.");
-    // Aquí puedes enlazar con la lógica mock de logic.js
+    console.warn("⚠️ Firebase no configurado. Pegá tu firebaseConfig en firebase-config.js");
 }
 
-export { db, ref, set, onValue, get };
+export { db, ref, set, get, onValue, update };
