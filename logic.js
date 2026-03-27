@@ -1,20 +1,12 @@
-// Logic for F1 Prode points calculation and state management
+// Logic for F1 Prode - Firebase Realtime Database version
+import { db, ref, set, get, onValue, update } from './firebase-config.js';
 
 // --- Rules ---
 const NORMAL_RULES = {
-    exact_1_11: 25,
-    exact_2_12: 18,
-    exact_3_13: 15,
-    pole: 5,
-    last: 10
+    exact_1_11: 25, exact_2_12: 18, exact_3_13: 15, pole: 5, last: 10
 };
-
 const SPRINT_RULES = {
-    exact_1_11: 8,
-    exact_2_12: 7,
-    exact_3_13: 6,
-    pole: 2,
-    last: 3
+    exact_1_11: 8, exact_2_12: 7, exact_3_13: 6, pole: 2, last: 3
 };
 
 // --- Calendar ---
@@ -49,8 +41,8 @@ const CALENDAR = [
     { id: 'r22', name: "Abu Dhabi", limit: "2026-12-05T14:50:00", isSprint: false, round: 22 }
 ];
 
-// --- Data persistence ---
-let players = JSON.parse(localStorage.getItem('f1_players')) || [
+// --- Default players (used only on first-ever run to seed the DB) ---
+const DEFAULT_PLAYERS = [
     { id: 'p1', name: 'Tomi', totalPts: 16, basePts: 16 },
     { id: 'p2', name: 'Juan', totalPts: 44, basePts: 44 },
     { id: 'p3', name: 'Bati', totalPts: 32, basePts: 32 },
@@ -58,20 +50,62 @@ let players = JSON.parse(localStorage.getItem('f1_players')) || [
     { id: 'p5', name: 'Jota', totalPts: 28, basePts: 28 }
 ];
 
+// --- In-memory state (always synced from Firebase) ---
+let players = DEFAULT_PLAYERS.map(p => ({ ...p }));
+let predictionsDb = {};
 let currentPlayerId = localStorage.getItem('f1_currentPlayer') || 'p1';
-let predictionsDb = JSON.parse(localStorage.getItem('f1_predictions')) || {};
 
-function saveState() {
-    localStorage.setItem('f1_players', JSON.stringify(players));
-    localStorage.setItem('f1_currentPlayer', currentPlayerId);
-    localStorage.setItem('f1_predictions', JSON.stringify(predictionsDb));
+// -------------------------------------------------------
+// Firebase helpers
+// -------------------------------------------------------
+
+function isFirebaseReady() {
+    return !!db;
+}
+
+async function initFromFirebase() {
+    if (!isFirebaseReady()) {
+        // Fallback: use localStorage if Firebase not configured
+        players = JSON.parse(localStorage.getItem('f1_players')) || DEFAULT_PLAYERS.map(p => ({ ...p }));
+        predictionsDb = JSON.parse(localStorage.getItem('f1_predictions')) || {};
+        updateLeaderboardUI();
+        return;
+    }
+
+    // Seed players if they don't exist yet in the DB
+    const playersSnap = await get(ref(db, 'players'));
+    if (!playersSnap.exists()) {
+        const initialPlayers = {};
+        DEFAULT_PLAYERS.forEach(p => { initialPlayers[p.id] = p; });
+        await set(ref(db, 'players'), initialPlayers);
+    }
+
+    // Listen for real-time updates on the entire game state
+    onValue(ref(db, '/'), (snapshot) => {
+        const data = snapshot.val() || {};
+        players = data.players ? Object.values(data.players) : DEFAULT_PLAYERS.map(p => ({ ...p }));
+        predictionsDb = data.predictions || {};
+        updateLeaderboardUI();
+    });
+}
+
+async function savePrediction(raceId, predictionData) {
+    if (!isFirebaseReady()) {
+        // Fallback localStorage
+        if (!predictionsDb[raceId]) predictionsDb[raceId] = {};
+        predictionsDb[raceId][currentPlayerId] = predictionData;
+        localStorage.setItem('f1_predictions', JSON.stringify(predictionsDb));
+        localStorage.setItem('f1_players', JSON.stringify(players));
+        updateLeaderboardUI();
+        return;
+    }
+    await set(ref(db, `predictions/${raceId}/${currentPlayerId}`), predictionData);
 }
 
 function calculatePoints(prediction, results, isSprint) {
     let pts = 0;
     if (!prediction || !results) return pts;
     const rules = isSprint ? SPRINT_RULES : NORMAL_RULES;
-
     if (prediction.pole === results.pole) pts += rules.pole;
     if (prediction.pos1 === results.pos1) pts += rules.exact_1_11;
     if (prediction.pos2 === results.pos2) pts += rules.exact_2_12;
@@ -80,34 +114,49 @@ function calculatePoints(prediction, results, isSprint) {
     if (prediction.pos12 === results.pos12) pts += rules.exact_2_12;
     if (prediction.pos13 === results.pos13) pts += rules.exact_3_13;
     if (prediction.last === results.last) pts += rules.last;
-
     return pts;
 }
 
-function savePrediction(raceId, predictionData) {
-    if (!predictionsDb[raceId]) predictionsDb[raceId] = {};
-    predictionsDb[raceId][currentPlayerId] = predictionData;
-    saveState();
-}
+async function processRaceResults(raceId, officialResults) {
+    if (isFirebaseReady()) {
+        // Save official results to Firebase
+        await set(ref(db, `results/${raceId}`), officialResults);
 
-function processRaceResults(raceId, officialResults) {
-    const racePredictions = predictionsDb[raceId];
-    if (!racePredictions) return;
+        // Read all data fresh
+        const snap = await get(ref(db, '/'));
+        const data = snap.val() || {};
+        const allPredictions = data.predictions || {};
+        const allResults = data.results || {};
+        const currentPlayers = data.players ? Object.values(data.players) : players;
 
-    const raceMeta = CALENDAR.find(r => r.id === raceId);
-    const isSprint = raceMeta ? raceMeta.isSprint : false;
+        // Recalculate total points for every player from all races
+        const updatedPlayers = {};
+        currentPlayers.forEach(p => {
+            let total = p.basePts || 0;
+            Object.keys(allResults).forEach(rid => {
+                const raceMeta = CALENDAR.find(r => r.id === rid);
+                const isSprint = raceMeta ? raceMeta.isSprint : false;
+                const pred = allPredictions[rid] && allPredictions[rid][p.id];
+                if (pred) total += calculatePoints(pred, allResults[rid], isSprint);
+            });
+            updatedPlayers[p.id] = { ...p, totalPts: total };
+        });
 
-    players.forEach(p => p.totalPts = p.basePts || 0);
-
-    Object.keys(racePredictions).forEach(pId => {
-        const player = players.find(p => p.id === pId);
-        if (player) {
-            player.totalPts += calculatePoints(racePredictions[pId], officialResults, isSprint);
-        }
-    });
-
-    saveState();
-    updateLeaderboardUI();
+        await update(ref(db, 'players'), updatedPlayers);
+    } else {
+        // localStorage fallback
+        const raceMeta = CALENDAR.find(r => r.id === raceId);
+        const isSprint = raceMeta ? raceMeta.isSprint : false;
+        const racePredictions = predictionsDb[raceId] || {};
+        players.forEach(p => {
+            p.totalPts = p.basePts || 0;
+            if (racePredictions[p.id]) {
+                p.totalPts += calculatePoints(racePredictions[p.id], officialResults, isSprint);
+            }
+        });
+        localStorage.setItem('f1_players', JSON.stringify(players));
+        updateLeaderboardUI();
+    }
 }
 
 function updateLeaderboardUI() {
@@ -116,14 +165,13 @@ function updateLeaderboardUI() {
     container.innerHTML = '';
 
     const sorted = [...players].sort((a, b) => b.totalPts - a.totalPts);
+    const nextRace = CALENDAR.find(r => new Date(r.limit) > new Date()) || CALENDAR[0];
 
     sorted.forEach((player, index) => {
         const pos = index + 1;
         const card = document.createElement('div');
         card.className = `leaderboard-card pos-${pos}`;
-        
-        // Check if current user has voted for the next race
-        const nextRace = CALENDAR.find(r => new Date(r.limit) > new Date()) || CALENDAR[0];
+
         const hasVoted = predictionsDb[nextRace.id] && predictionsDb[nextRace.id][player.id];
 
         card.innerHTML = `
@@ -140,20 +188,41 @@ function updateLeaderboardUI() {
     });
 }
 
-function resetAllData() {
+function loadMyPredictions(raceId) {
+    return predictionsDb[raceId] ? predictionsDb[raceId][currentPlayerId] : null;
+}
+
+async function resetAllData() {
+    if (isFirebaseReady()) {
+        const initialPlayers = {};
+        DEFAULT_PLAYERS.forEach(p => { initialPlayers[p.id] = { ...p }; });
+        await set(ref(db, 'players'), initialPlayers);
+        await set(ref(db, 'predictions'), null);
+    }
     localStorage.removeItem('f1_players');
     localStorage.removeItem('f1_currentPlayer');
     localStorage.removeItem('f1_predictions');
     window.location.reload();
 }
 
-function loadMyPredictions(raceId) {
-    return predictionsDb[raceId] ? predictionsDb[raceId][currentPlayerId] : null;
-}
-
+// -------------------------------------------------------
+// Public API (same interface as before so app.js works)
+// -------------------------------------------------------
 window.F1Logic = {
-    CALENDAR, players, calculatePoints, savePrediction, processRaceResults,
-    updateLeaderboardUI, loadMyPredictions, resetAllData,
-    setCurrentPlayer: (id) => { currentPlayerId = id; saveState(); },
+    CALENDAR,
+    get players() { return players; },
+    calculatePoints,
+    savePrediction,
+    processRaceResults,
+    updateLeaderboardUI,
+    loadMyPredictions,
+    resetAllData,
+    setCurrentPlayer: (id) => {
+        currentPlayerId = id;
+        localStorage.setItem('f1_currentPlayer', id);
+    },
     getCurrentPlayer: () => currentPlayerId
 };
+
+// Boot
+initFromFirebase();
