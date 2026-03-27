@@ -475,6 +475,51 @@
         </div>
     </div>
 
+    <!-- User Session Modal -->
+    <div id="session-modal" class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-black/80 backdrop-blur-xl hidden">
+        <div class="bg-[#1C1C1E] w-full max-w-sm rounded-[2rem] border border-primary/20 overflow-hidden flex flex-col shadow-2xl p-6 shadow-[0_10px_40px_rgba(255,180,168,0.1)]">
+            <div class="mb-5 text-center">
+                <span class="material-symbols-outlined text-[3rem] text-primary" style="font-variation-settings:'FILL' 1" data-icon="account_circle">account_circle</span>
+                <h2 class="font-headline text-xl font-black italic uppercase text-white tracking-tighter mt-1">¿Con quién jugás?</h2>
+                <p class="text-on-surface-variant text-sm mt-1">Seleccioná tu perfil para continuar</p>
+            </div>
+
+            <div id="session-player-list" class="flex flex-col gap-2 mb-5">
+                <!-- Populated dynamically -->
+            </div>
+
+            <button id="session-modal-continue" class="w-full bg-primary text-on-primary font-headline font-bold py-3.5 rounded-xl hover:opacity-90 active:scale-95 transition-all text-[15px] uppercase tracking-[0.1em]">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- Vote Summary Confirmation Modal -->
+    <div id="summary-modal" class="fixed inset-0 z-[70] flex items-center justify-center px-4 bg-black/80 backdrop-blur-xl hidden">
+        <div class="bg-[#1C1C1E] w-full max-w-sm rounded-[2rem] border border-primary/20 flex flex-col shadow-2xl p-6 shadow-[0_10px_40px_rgba(255,180,168,0.1)]">
+            <div class="mb-4 text-center">
+                <span class="material-symbols-outlined text-[2.5rem] text-primary" style="font-variation-settings:'FILL' 1" data-icon="fact_check">fact_check</span>
+                <h2 class="font-headline text-xl font-black italic uppercase text-white tracking-tighter mt-1">Confirmá tus votos</h2>
+                <p class="text-on-surface-variant text-sm mt-1">
+                    <strong id="summary-modal-user" class="text-primary"></strong> &middot; <span id="summary-modal-race" class="text-white/60"></span>
+                </p>
+            </div>
+
+            <div id="summary-modal-rows" class="mb-5 bg-surface-container-low rounded-xl px-4 py-2">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button id="summary-modal-confirm" class="w-full bg-primary text-on-primary font-headline font-bold py-3.5 rounded-xl hover:opacity-90 active:scale-95 transition-all text-[15px] uppercase tracking-[0.1em]">
+                    ¡Guardar!
+                </button>
+                <button id="summary-modal-edit" class="w-full bg-surface-container-highest text-white font-headline font-bold py-3 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-sm uppercase tracking-widest border border-white/10">
+                    Volver a editar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Navigation (Premium) -->
     <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#131313]/90 backdrop-blur-xl border-t border-[#603E39]/15 shadow-[0_-4px_20px_rgba(0,0,0,0.6)] rounded-t-[2.5rem]">
         <a href="#" class="nav-item flex flex-col items-center justify-center text-[#E5E2E1]/60 px-4 py-1.5 hover:text-[#FFB4A8] transition-all active" data-target="view-leaderboard">

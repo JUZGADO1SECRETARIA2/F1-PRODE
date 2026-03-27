@@ -1,4 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Session state flag: modal only shown once per session before voting
+    let sessionConfirmed = false;
+
+    // Session Modal Logic
+    const sessionModal = document.getElementById('session-modal');
+    const sessionPlayerList = document.getElementById('session-player-list');
+    const sessionModalContinue = document.getElementById('session-modal-continue');
+    let sessionModalCallback = null;
+
+    function buildSessionPlayerList() {
+        if (!sessionPlayerList || !window.F1Logic) return;
+        sessionPlayerList.innerHTML = '';
+        window.F1Logic.players.forEach(player => {
+            const btn = document.createElement('button');
+            const isActive = player.id === window.F1Logic.getCurrentPlayer();
+            btn.type = 'button';
+            btn.className = `session-player-btn w-full text-left px-4 py-3 rounded-xl font-headline font-bold text-base transition-all border ${
+                isActive
+                    ? 'bg-primary text-on-primary border-primary shadow-md scale-[1.02]'
+                    : 'bg-surface-container-highest text-white border-white/10 hover:border-primary/40 hover:bg-surface-container-high'
+            }`;
+            btn.innerHTML = `<span class="material-symbols-outlined align-middle mr-2 text-sm" style="font-variation-settings:'FILL' ${isActive ? 1 : 0}" data-icon="account_circle">account_circle</span>${player.name}`;
+            btn.addEventListener('click', () => {
+                window.F1Logic.setCurrentPlayer(player.id);
+                const userSwitcher = document.getElementById('user-switcher');
+                if (userSwitcher) userSwitcher.value = player.id;
+                buildSessionPlayerList();
+            });
+            sessionPlayerList.appendChild(btn);
+        });
+    }
+
+    function showSessionModal(callback) {
+        if (!window.F1Logic) return;
+        buildSessionPlayerList();
+        if (sessionModal) sessionModal.classList.remove('hidden');
+        sessionModalCallback = callback || null;
+    }
+
+    if (sessionModalContinue) {
+        sessionModalContinue.addEventListener('click', () => {
+            sessionModal.classList.add('hidden');
+            sessionConfirmed = true;
+            if (sessionModalCallback) sessionModalCallback();
+        });
+    }
+
     // Basic Routing for Bottom Navigation
     const navItems = document.querySelectorAll('.nav-item');
     const views = document.querySelectorAll('.view');
@@ -7,27 +54,35 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             
-            navItems.forEach(nav => {
-                nav.classList.remove('active', 'scale-95', 'bg-gradient-to-b', 'from-[#FFB4A8]', 'to-[#FF5540]', 'text-[#131313]');
-                nav.classList.add('text-[#E5E2E1]/60');
-            });
-
-            // Re-apply active class logic
             const targetId = item.getAttribute('data-target');
-            views.forEach(view => view.classList.add('hidden'));
-            document.getElementById(targetId).classList.remove('hidden');
 
-            // Handle Nav Item active state
-            if (targetId === 'view-predictions') {
-                 item.classList.add('scale-95', 'bg-gradient-to-b', 'from-[#FFB4A8]', 'to-[#FF5540]', 'text-[#131313]');
-                 item.classList.remove('text-[#E5E2E1]/60');
+            const navigate = () => {
+                navItems.forEach(nav => {
+                    nav.classList.remove('active', 'scale-95', 'bg-gradient-to-b', 'from-[#FFB4A8]', 'to-[#FF5540]', 'text-[#131313]');
+                    nav.classList.add('text-[#E5E2E1]/60');
+                });
+
+                views.forEach(view => view.classList.add('hidden'));
+                document.getElementById(targetId).classList.remove('hidden');
+
+                // Handle Nav Item active state
+                if (targetId === 'view-predictions') {
+                     item.classList.add('scale-95', 'bg-gradient-to-b', 'from-[#FFB4A8]', 'to-[#FF5540]', 'text-[#131313]');
+                     item.classList.remove('text-[#E5E2E1]/60');
+                } else {
+                     item.classList.add('active');
+                     item.classList.remove('text-[#E5E2E1]/60');
+                     item.classList.add('text-[#FFB4A8]');
+                }
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            if (targetId === 'view-predictions' && !sessionConfirmed) {
+                showSessionModal(navigate);
             } else {
-                 item.classList.add('active');
-                 item.classList.remove('text-[#E5E2E1]/60');
-                 item.classList.add('text-[#FFB4A8]');
+                navigate();
             }
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
 
@@ -329,6 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     predictionForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const raceId = raceSelector.value;
+        const raceName = raceSelector.options[raceSelector.selectedIndex]?.text.split(' [')[0] || raceId;
         const formData = new FormData(predictionForm);
         const data = {};
         let missing = false;
@@ -344,9 +400,37 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        window.F1Logic.savePrediction(raceId, data);
-        alert('¡Predicciones guardadas exitosamente!');
-        document.querySelector('[data-target="view-leaderboard"]').click();
+        // Show summary confirmation modal
+        const playerId = window.F1Logic.getCurrentPlayer();
+        const playerObj = window.F1Logic.players.find(p => p.id === playerId);
+        const playerName = playerObj ? playerObj.name : playerId;
+
+        const labelMap = { pole: 'Pole', pos1: 'P1', pos2: 'P2', pos3: 'P3', pos11: 'P11', pos12: 'P12', pos13: 'P13', last: 'Último' };
+        const driverName = (code) => {
+            const d = drivers.find(dr => dr.code === code);
+            return d ? d.name : code;
+        };
+
+        const summaryRows = Object.keys(labelMap).map(k => `
+            <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                <span class="text-xs font-black uppercase tracking-widest text-primary">${labelMap[k]}</span>
+                <span class="text-sm font-bold text-white">${driverName(data[k])}</span>
+            </div>`).join('');
+
+        const summaryModal = document.getElementById('summary-modal');
+        document.getElementById('summary-modal-user').textContent = playerName;
+        document.getElementById('summary-modal-race').textContent = raceName;
+        document.getElementById('summary-modal-rows').innerHTML = summaryRows;
+        if (summaryModal) summaryModal.classList.remove('hidden');
+
+        document.getElementById('summary-modal-confirm').onclick = () => {
+            summaryModal.classList.add('hidden');
+            window.F1Logic.savePrediction(raceId, data);
+            document.querySelector('[data-target="view-leaderboard"]').click();
+        };
+        document.getElementById('summary-modal-edit').onclick = () => {
+            summaryModal.classList.add('hidden');
+        };
     });
 
     // Results Submission
@@ -385,4 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Init Leaderboard
     if (window.F1Logic) window.F1Logic.updateLeaderboardUI();
+
+    // Show Session Modal on start
+    showSessionModal();
 });
