@@ -325,10 +325,21 @@ document.addEventListener('DOMContentLoaded', () => {
             loadFormFromState();
         });
 
+        // Results selector: all past races are SELECTABLE (they need results entered)
         const resRaceSel = document.getElementById('results-race-selector');
         if (resRaceSel) {
-            resRaceSel.innerHTML = raceSelector.innerHTML;
-            resRaceSel.value = raceSelector.value;
+            resRaceSel.innerHTML = '';
+            calendar.forEach(race => {
+                const opt = document.createElement('option');
+                opt.value = race.id;
+                const isPast = now > new Date(race.limit);
+                opt.textContent = race.name + (isPast ? ' [FIN]' : ' [pendiente]');
+                // Do NOT disable past races here - past races need results!
+                resRaceSel.appendChild(opt);
+            });
+            // Pre-select the most recently completed race
+            const lastPast = [...calendar].reverse().find(r => now > new Date(r.limit));
+            if (lastPast) resRaceSel.value = lastPast.id;
         }
     }
 
